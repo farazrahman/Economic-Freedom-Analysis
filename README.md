@@ -1,79 +1,17 @@
-library('tidyverse') 
-library('leaflet')
-library('ggmap')
-library('GGally')
-library('viridis')
-library('plotly')
-library('IRdisplay')
-library('ggrepel')
-library('cowplot')
-library('jtools')
-library('car')
-library('MASS')
+INTRODUCTION: This analysis is based on the data of '2018 INDEX OF ECONOMIC FREEDOM', world’s premier measurement of economic freedom, ranking countries based on five areas: size of government, legal structure and security of property rights, access to sound money, freedom to trade internationally, and regulation of credit, labour and business. https://www.fraserinstitute.org/studies/economic-freedom
 
-options(warn = -1)
+What is Economic Freedom & Why it is important?
 
-data <- read_csv("../input/efw_cc.csv")
-summary(data)
-glimpse(data)
+Economic Freedom is the basic right of every individual, where every person is free to use their income,property & resources and invest according to their will, without much intervention from the Governmental Policies. This is very important for overall prosperity of the society, democracy and the fundamental right to make economic decisions.
 
+The Economic Freedom Index is measured in 5 broad areas and they are,
 
-##CHECKING FOR THE MISSING DATA:
-missing_data <- data %>% summarise_all(funs(sum(is.na(.))/n()))
-missing_data <- gather(missing_data, key = "variables", value = "percent_missing") 
-ggplot(missing_data, aes(x = reorder(variables, percent_missing), y = percent_missing)) +xlab('variables')+
-  geom_bar(stat = "identity", fill = "red", aes(color = I('white')), size = 0.3)+coord_flip()+ theme_bw()
-  
- ##DATA PREPARATION:
- 
- data$year <- factor(data$year)
-data$countries <- factor(data$countries)
-colnames(data)[4] <- "Economic_Freedom"
+Area 1: Size of Government - As government spending, taxation, and the size of government-controlled enterprises increase, government decision-making is substituted for individual choice and economic freedom is reduced.
 
+Area 2: Legal System and Property Rights - Protection of persons and their rightfully acquired property is a central element of both economic freedom and civil society. Indeed, it is the most important function of government.
 
-##ECONOMIC FREEDOM OF THE WORLD(1970-2016):
+Area 3: Sound Money - Inflation erodes the value of rightfully earned wages and savings. Sound money is thus essential to protect property rights. When inflation is not only high but also volatile, it becomes difficult for individuals to plan for the future and thus use economic freedom effectively.
 
-data %>% filter(!is.na(Economic_Freedom) | !is.na(year)) %>% group_by(year) %>%
-ggplot(aes(year,Economic_Freedom, fill = Economic_Freedom, group = 1))+
-geom_line(aes(color = Economic_Freedom))+
-scale_color_viridis(option = "plasma",direction = -1, discrete=FALSE) +
-facet_wrap(~countries)+theme_bw()+
-theme(legend.position = "none", axis.text.x = element_blank(), 
-      strip.text.x = element_text(size = 6))+
-xlab(" ") + ylab("")+ ggtitle("ECONOMIC FREEDOM OF THE WORLD 1970-2016")
+Area 4: Freedom to Trade Internationally - Freedom to exchange—in its broadest sense, buying, selling, making contracts, and so on—is essential to economic freedom, which is reduced when freedom to exchange does not include businesses and individuals in other nations.
 
-
-##ANAYSIS FOR THE YEAR 2016:
-
-data1 <- data %>% filter(year == 2016)
-head(data1)
-
-
-##COUNTRIES HAVING HIGHEST AND LEAST ECONOMIC FREEDOM INDEX:
-
-a1 <- ggplotly(ggplot(data1, aes(quartile,Economic_Freedom , size = -rank)) + 
-       geom_jitter(aes(color=countries, alpha=0.5)) +
-        theme_bw()+ theme(legend.position= "none")+
-        xlab("Quartile") + 
-        ggtitle("Economic Freedom Index 2016"), tooltip = c("countries"))
-
-htmlwidgets::saveWidget(a1, "a1.html")
-display_html('<iframe src="a1.html" width=100% height=450></iframe>')
-
-
-##ECONOMIC FREEDOM INDEX 2016:
-
-l <- list(color = toRGB("black"), width = 0.5)
-
-g <- list(showframe = FALSE,
-  showcoastlines = TRUE,
-  projection = list(type = 'Mercator'))
-
-p1 <- plot_geo(data1) %>%
-  add_trace(z = ~Economic_Freedom, color = ~Economic_Freedom, colors = 'RdYlBu',
-    text = ~data1$countries, locations = ~data1$ISO_code, marker = list(line = l)) %>%
-  colorbar(title = 'Countries' , tickprefix = 'EF') %>%
-  layout(title = 'Economic Freedom 2016')
-
-htmlwidgets::saveWidget(p1, "p1.html")
-display_html('<iframe src="p1.html" width=100% height=450></iframe>')
+Area 5: Regulation - Governments not only use a number of tools to limit the right to exchange internationally, they may also develop onerous regulations that limit the right to exchange, gain credit, hire or work for whom you wish, or freely operate your business.
